@@ -17,63 +17,86 @@
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#12151a;--card:#1b2027;--text:#e8ebef;--muted:#98a1ad;--line:#2a313a;--accent:#60a5fa;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171;--field:#2a3547}}
 :root[data-theme="dark"]{color-scheme:dark;--bg:#12151a;--card:#1b2027;--text:#e8ebef;--muted:#98a1ad;--line:#2a313a;--accent:#60a5fa;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171;--field:#2a3547}
-*{box-sizing:border-box}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+button{cursor:pointer;font-family:inherit;touch-action:manipulation}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 body{margin:0;background:var(--bg);color:var(--text);font:16px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
-main{max-width:560px;margin:0 auto;padding:16px}
-.nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.nav h1{font-size:1.25rem;margin:0}
-.nav button{background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:10px;width:40px;height:40px;font-size:1.1rem}
+main{max-width:560px;margin:0 auto;padding:16px 16px 96px}
+.col-b{margin-top:16px}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.nav>button{flex:none;width:48px;height:48px;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:12px;font-size:1.5rem;line-height:1}
+.nav>button:hover{background:var(--line)}
+.mid{flex:1;min-width:0;text-align:center}
+.mid h1{font-size:1.3rem;margin:0}
+.chip{background:none;border:0;color:var(--accent);font-size:.85rem;padding:4px 8px}
 .sum,.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
 .card{margin-top:16px}
 .card h2{font-size:1rem;margin:0 0 8px}
 .sum .row{display:flex;justify-content:space-between;gap:8px;text-align:center}
-.sum small,.card small{display:block;color:var(--muted);font-size:.78rem}
-.sum b{font-size:1.1rem}
+.sum small{display:block;color:var(--muted);font-size:.78rem}
+.sum b{font-size:1.15rem}
+.card small{display:block;color:var(--muted);font-size:.8rem}
 .bar{height:8px;background:var(--line);border-radius:99px;margin-top:12px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
 .done{color:var(--ok);font-weight:600;text-align:center;margin-top:10px}
-.flt{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:.95rem}
-.flt input{width:22px;height:22px;accent-color:var(--accent)}
+.flt{display:flex;align-items:center;gap:12px;min-height:44px;margin:0 0 6px;font-size:1rem;cursor:pointer}
+.flt input{width:24px;height:24px;accent-color:var(--accent)}
 ul{list-style:none;margin:0;padding:0}
-li{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:8px}
-li input[type=checkbox]{width:26px;height:26px;accent-color:var(--ok);flex:none}
-li .m{flex:1;min-width:0}
-li .n{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-li .d{font-size:.82rem;color:var(--muted)}
+li{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px 4px 6px 4px;margin-bottom:8px;min-height:64px}
+li:hover{border-color:var(--accent)}
+.cbw{display:flex;padding:9px;cursor:pointer;flex:none}
+.cbw input{width:28px;height:28px;margin:0;accent-color:var(--ok)}
+li .m{flex:1;min-width:0;padding:4px 0}
+li .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+li .n{font-weight:600;min-width:0;overflow-wrap:anywhere}
+li .a{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+li .d{font-size:.84rem;color:var(--muted)}
 li .d.bad{color:var(--bad)}li .d.warn{color:var(--warn)}li .d.ok{color:var(--ok)}
-li .a{font-variant-numeric:tabular-nums;font-weight:600}
 li.paid{opacity:.7}
 li.paid .n,li.paid .a{text-decoration:line-through;color:var(--muted)}
-li .x,li .e{background:none;border:0;color:var(--muted);font-size:1.1rem;padding:6px}
-li .x.sure{color:var(--bad);font-size:.8rem;font-weight:600}
-.add{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.add h2{grid-column:1/-1;font-size:1rem;margin:0}
-.add label{font-size:.8rem;color:var(--muted);display:block;margin-bottom:3px}
-.add input,.add select{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--field);color:var(--text);font-size:16px;min-height:44px}
+.ib{flex:none;width:46px;height:46px;border:0;border-radius:12px;background:none;color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:1.3rem}
+.ib:hover{background:var(--line)}
+.ib.edit{color:var(--accent)}
+.ib.edit svg{width:26px;height:26px}
+.ib.sure{width:auto;padding:0 10px;color:var(--bad);font-size:.85rem;font-weight:600}
+.add{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.add h2{grid-column:1/-1;font-size:1.05rem;margin:0}
+.add label{font-size:.82rem;color:var(--muted);display:block;margin-bottom:4px}
+.add input,.add select{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--field);color:var(--text);font-size:16px;min-height:48px}
 .add .full{grid-column:1/-1}
-.add .chk{grid-column:1/-1;display:flex;align-items:center;gap:10px;font-size:.95rem;color:var(--text);margin:0}
-.add .chk input{width:22px;height:22px;min-height:0;accent-color:var(--accent);flex:none}
-.add button{grid-column:1/-1;padding:12px;border:0;border-radius:10px;background:var(--accent);color:#fff;font-size:1rem;font-weight:600}
+.add .chk{grid-column:1/-1;display:flex;align-items:center;gap:12px;min-height:44px;font-size:1rem;color:var(--text);margin:0}
+.add .chk input{width:24px;height:24px;min-height:0;accent-color:var(--accent);flex:none}
+.add button{grid-column:1/-1;min-height:52px;padding:12px;border:0;border-radius:12px;background:var(--accent);color:#fff;font-size:1.05rem;font-weight:600}
+.add button:hover{filter:brightness(1.08)}
 .add .cancel{background:var(--line);color:var(--text)}
 .add button[hidden]{display:none}
-.add .sw{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap}
-.add .sw button{grid-column:auto;width:36px;height:36px;padding:0;border-radius:50%;border:2px solid var(--line);font-size:.9rem;font-weight:400;color:var(--muted)}
+.add .sw{grid-column:1/-1;display:flex;gap:12px;flex-wrap:wrap}
+.add .sw button{grid-column:auto;min-height:0;width:42px;height:42px;padding:0;border-radius:50%;border:2px solid var(--line);font-size:1rem;font-weight:400;color:var(--muted)}
 .add .sw button.on{border-color:var(--text);box-shadow:inset 0 0 0 3px var(--card)}
-.card button.sec{padding:11px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font-size:.95rem;margin:0 8px 8px 0}
-details summary{font-weight:600;cursor:pointer}
-table{width:100%;border-collapse:collapse;margin-top:10px;font-variant-numeric:tabular-nums;font-size:.92rem}
-td,th{padding:8px 4px;text-align:right;border-bottom:1px solid var(--line)}
+.card button.sec{min-height:48px;padding:11px 16px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--text);font-size:1rem;margin:0 8px 8px 0}
+.card button.sec:hover{background:var(--line)}
+details summary{font-weight:600;cursor:pointer;min-height:44px;display:flex;align-items:center}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.95rem}
+td,th{padding:10px 4px;text-align:right;border-bottom:1px solid var(--line)}
 td:first-child,th:first-child{text-align:left}
-tr.m{cursor:pointer}tr.cur td{font-weight:700}
+tr.m{cursor:pointer}tr.m:hover td{background:var(--bg)}tr.cur td{font-weight:700}
 tfoot td{font-weight:700;border-bottom:0}
 .empty{text-align:center;color:var(--muted);padding:24px 8px}
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:2rem;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+@media (min-width:900px){
+  main{max-width:1040px;padding:24px 24px 40px}
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:24px;align-items:start}
+  .col-b{margin-top:0;position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto}
+  .fab{display:none}
+}
 </style>
 </head>
 <body>
 <main>
+<div class="layout"><section class="col-a">
   <div class="nav">
     <button id="prev" aria-label="Voriger Monat">‹</button>
-    <h1 id="title"></h1>
+    <div class="mid"><h1 id="title"></h1><button id="today" class="chip" hidden>Zum aktuellen Monat</button></div>
     <button id="next" aria-label="Nächster Monat">›</button>
   </div>
   <div class="sum">
@@ -87,7 +110,8 @@ tfoot td{font-weight:700;border-bottom:0}
   </div>
   <label class="flt"><input id="onlyopen" type="checkbox"> Nur offene anzeigen</label>
   <ul id="list"></ul>
-  <div class="add">
+</section><aside class="col-b">
+  <div class="add" id="formcard">
     <h2 id="ft">Neue Fixkosten</h2>
     <div class="full"><label for="nm">Name</label><input id="nm" placeholder="z. B. Miete" maxlength="60"></div>
     <div><label for="am">Betrag in €</label><input id="am" type="number" inputmode="decimal" step="0.01" min="0"></div>
@@ -112,7 +136,9 @@ tfoot td{font-weight:700;border-bottom:0}
     <input id="file" type="file" accept=".json,application/json" hidden>
     <small id="lb"></small>
   </div>
+</aside></div>
 </main>
+<button id="fab" class="fab" aria-label="Neuer Eintrag">+</button>
 <script>
 var KEY='fixkosten-v1';
 var state={items:[],paid:{},ov:{},openOnly:false};
@@ -120,6 +146,7 @@ try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&p.item
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
 var now=new Date(),cy=now.getFullYear(),cm=now.getMonth(),sure=null;
 var editId=null,editDay=null,editKey=null,selCol='';
+var PEN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>';
 var COLS=['#ef4444','#f59e0b','#22c55e','#3b82f6','#a855f7','#ec4899'];
 var $=function(i){return document.getElementById(i)};
 var eur=function(v){return v.toLocaleString('de-DE',{style:'currency',currency:'EUR'})};
@@ -144,6 +171,7 @@ function calc(y,m){
   }).sort(function(a,b){return a.d-b.d});
 }
 function render(){
+  now=new Date();
   var list=calc(cy,cm),ul=$('list'),tot=0,pd=0,shown=0;
   ul.innerHTML='';$('title').textContent=mname(cy,cm);
   list.forEach(function(c){tot+=c.amt;if(c.paid)pd+=c.amt;});
@@ -159,27 +187,31 @@ function render(){
     if(it.end!=null&&cy*12+cm===it.end)info+=' · letzte Zahlung';
     var li=document.createElement('li');if(c.paid)li.className='paid';
     if(it.col){li.style.background=it.col+'2e';li.style.borderLeft='6px solid '+it.col;}
-    var cb=document.createElement('input');cb.type='checkbox';cb.checked=c.paid;
+    var cb=document.createElement('input');cb.type='checkbox';cb.checked=c.paid;cb.setAttribute('aria-label',it.name+' bezahlt');
     cb.onchange=function(){var k=mkey();state.paid[k]=state.paid[k]||{};state.paid[k][it.id]=cb.checked;save();render();};
+    var w=document.createElement('label');w.className='cbw';w.appendChild(cb);
     var m=document.createElement('div');m.className='m';
+    var tp=document.createElement('div');tp.className='top';
     var n=document.createElement('div');n.className='n';n.textContent=it.name;
-    var dd=document.createElement('div');dd.className='d '+cls;dd.textContent=info;
-    m.appendChild(n);m.appendChild(dd);
     var a=document.createElement('div');a.className='a';a.textContent=eur(c.amt);
-    var e=document.createElement('button');e.className='e';e.textContent='✎';e.setAttribute('aria-label','Bearbeiten');e.onclick=function(){startEdit(it)};
-    var x=document.createElement('button');x.className='x'+(sure===it.id?' sure':'');x.textContent=sure===it.id?'Löschen?':'✕';
+    tp.appendChild(n);tp.appendChild(a);
+    var dd=document.createElement('div');dd.className='d '+cls;dd.textContent=info;
+    m.appendChild(tp);m.appendChild(dd);
+    var e=document.createElement('button');e.className='ib edit';e.innerHTML=PEN;e.setAttribute('aria-label','Bearbeiten');e.onclick=function(){startEdit(it)};
+    var x=document.createElement('button');x.className='ib'+(sure===it.id?' sure':'');x.textContent=sure===it.id?'Löschen?':'✕';x.setAttribute('aria-label','Löschen');
     x.onclick=function(){
       if(sure===it.id){state.items=state.items.filter(function(i){return i.id!==it.id});sure=null;if(editId===it.id)resetForm();save();}
       else sure=it.id;
       render();
     };
-    li.appendChild(cb);li.appendChild(m);li.appendChild(a);li.appendChild(e);li.appendChild(x);ul.appendChild(li);
+    li.appendChild(w);li.appendChild(m);li.appendChild(e);li.appendChild(x);ul.appendChild(li);
   });
   if(!shown)ul.innerHTML='<div class="empty">'+(!state.items.length?'Noch keine Fixkosten eingetragen.':!list.length?'In diesem Monat ist nichts fällig.':'Alles erledigt, nichts mehr offen.')+'</div>';
   $('tot').textContent=eur(tot);$('open').textContent=eur(tot-pd);$('paid').textContent=eur(pd);
   $('fill').style.width=(tot?pd/tot*100:0)+'%';
   $('done').hidden=!(list.length&&pd===tot);
   $('onlyopen').checked=!!state.openOnly;
+  $('today').hidden=(cy===now.getFullYear()&&cm===now.getMonth());
   $('lb').textContent=state.lastBackup?'Letzte Sicherung: '+new Date(state.lastBackup).toLocaleDateString('de-DE'):'Noch keine Sicherung erstellt.';
   renderYear();
 }
@@ -220,6 +252,7 @@ function startEdit(it){
   $('au').checked=!!it.auto;selCol=it.col||'';drawSw();
   $('ft').textContent='Fixkosten bearbeiten';$('addBtn').textContent='Änderung speichern';$('cancelBtn').hidden=false;
   $('nm').scrollIntoView({behavior:'smooth',block:'center'});
+  if(window.matchMedia('(min-width:900px)').matches)$('nm').focus({preventScroll:true});
 }
 function resetForm(){
   editId=null;editDay=null;editKey=null;
@@ -249,6 +282,8 @@ $('addBtn').onclick=function(){
 };
 $('prev').onclick=function(){cm--;if(cm<0){cm=11;cy--;}sure=null;render();};
 $('next').onclick=function(){cm++;if(cm>11){cm=0;cy++;}sure=null;render();};
+$('today').onclick=function(){cy=now.getFullYear();cm=now.getMonth();sure=null;render();};
+$('fab').onclick=function(){$('formcard').scrollIntoView({behavior:'smooth',block:'start'});};
 $('onlyopen').onchange=function(){state.openOnly=this.checked;save();render();};
 function doExport(){
   var name='fixkosten-sicherung-'+now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+'.json';
