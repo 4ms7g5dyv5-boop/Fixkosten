@@ -11,6 +11,9 @@
 <meta name="apple-mobile-web-app-title" content="Zahltag">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#2563eb">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap">
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 --bg:#f6f7f9;--card:#fff;--text:#1d232b;--muted:#6b7480;--line:#e3e6ea;--accent:#2563eb;--ok:#16a34a;--warn:#d97706;--bad:#dc2626;--field:#e8f0fe;--item:#eef2f8;--itemline:#c9d4e4}
@@ -119,7 +122,10 @@ details:not([open]) .chev{transform:rotate(-90deg)}
 .add.closed .chev{transform:rotate(-90deg)}
 .add.closed{padding-top:4px;padding-bottom:4px}
 .add.closed>*:not(.fh){display:none}
-.apphead h1{font-family:ui-rounded,"SF Pro Rounded","Avenir Next",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:1.8rem;font-weight:800;letter-spacing:-.01em;margin:4px 0 14px}
+.apphead{display:flex;align-items:center;justify-content:center;gap:clamp(8px,3vw,16px);margin:4px 0 14px}
+.apphead h1{margin:0;font-family:Pacifico,"Brush Script MT","Snell Roundhand","Segoe Script",cursive;font-weight:400;font-size:clamp(1.4rem,6.6vw,2.4rem);line-height:1.5;padding:0 .12em;text-align:center;white-space:nowrap;background:linear-gradient(90deg,#ff9a1f 0%,#ff6a3d 50%,#ff3d78 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 8px rgba(255,90,110,.4)) drop-shadow(0 2px 0 rgba(110,20,40,.35))}
+.coin{flex:none;width:clamp(28px,8vw,44px);height:clamp(28px,8vw,44px);filter:drop-shadow(0 2px 3px rgba(0,0,0,.25))}
+.coin.l{transform:rotate(-14deg)}.coin.r{transform:rotate(14deg)}
 .filters .flt{flex:1 1 100%;margin:0}
 .filters select{flex:1 1 0;min-width:0}
 .empty{text-align:center;color:var(--muted);padding:24px 8px}
@@ -134,7 +140,7 @@ details:not([open]) .chev{transform:rotate(-90deg)}
 </head>
 <body>
 <main>
-<header class="apphead"><h1>Meine Fixkosten</h1></header>
+<header class="apphead"><svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="cg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe9a0"/><stop offset=".5" stop-color="#f2b73a"/><stop offset="1" stop-color="#b9791a"/></linearGradient><symbol id="coin" viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="url(#cg)" stroke="#8a5a10" stroke-width="2"/><circle cx="24" cy="24" r="16.5" fill="none" stroke="#fff3c2" stroke-opacity=".75" stroke-width="2"/><text x="24" y="32" text-anchor="middle" font-family="Poppins,system-ui,sans-serif" font-weight="800" font-size="22" fill="#7a4a08">€</text></symbol></defs></svg><svg class="coin l" aria-hidden="true"><use href="#coin"/></svg><h1>Meine Fixkosten</h1><svg class="coin r" aria-hidden="true"><use href="#coin"/></svg></header>
 <div class="layout"><section class="col-a">
   <div class="nav">
     <button id="prev" aria-label="Voriger Monat">‹</button>
