@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Fixkosten-Checkliste</title>
+<title>Zahltag</title>
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="apple-touch-icon" href="icon-512.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Fixkosten">
+<meta name="apple-mobile-web-app-title" content="Zahltag">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#2563eb">
 <style>
@@ -81,6 +81,9 @@ td,th{padding:10px 4px;text-align:right;border-bottom:1px solid var(--line)}
 td:first-child,th:first-child{text-align:left}
 tr.m{cursor:pointer}tr.m:hover td{background:var(--bg)}tr.cur td{font-weight:700}
 tfoot td{font-weight:700;border-bottom:0}
+.filters{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:6px}
+.filters select{min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:16px;max-width:100%}
+.cat{display:inline-block;background:var(--field);color:var(--text);border-radius:99px;padding:1px 9px;font-size:.74rem;margin-right:6px;font-weight:600}
 .empty{text-align:center;color:var(--muted);padding:24px 8px}
 .fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:2rem;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.3)}
 @media (min-width:900px){
@@ -108,12 +111,13 @@ tfoot td{font-weight:700;border-bottom:0}
     <div class="bar"><i id="fill"></i></div>
     <div class="done" id="done" hidden>✓ Alles bezahlt</div>
   </div>
-  <label class="flt"><input id="onlyopen" type="checkbox"> Nur offene anzeigen</label>
+  <div class="filters"><label class="flt"><input id="onlyopen" type="checkbox"> Nur offene anzeigen</label><select id="catf" aria-label="Kategorie filtern"></select></div>
   <ul id="list"></ul>
 </section><aside class="col-b">
   <div class="add" id="formcard">
     <h2 id="ft">Neue Fixkosten</h2>
     <div class="full"><label for="nm">Name</label><input id="nm" placeholder="z. B. Miete" maxlength="60"></div>
+    <div class="full"><label for="ct">Kategorie (optional)</label><input id="ct" list="catlist" placeholder="z. B. Wohnen" maxlength="30"><datalist id="catlist"></datalist></div>
     <div><label for="am">Betrag in €</label><input id="am" type="number" inputmode="decimal" step="0.01" min="0"></div>
     <div><label for="iv">Rhythmus</label>
       <select id="iv"><option value="1">monatlich</option><option value="3">vierteljährlich</option><option value="6">halbjährlich</option><option value="12">jährlich</option></select>
@@ -170,9 +174,24 @@ function calc(y,m){
     return {it:it,d:d,amt:has?ov[it.id]:it.amount,ovr:has,auto:auto,paid:man===undefined?auto:man,isNow:isNow,today:today};
   }).sort(function(a,b){return a.d-b.d});
 }
+var DEFCATS=['Wohnen','Versicherung','Abos','Mobilität','Telefon & Internet','Energie','Sonstiges'];
+function usedCats(){var o={};state.items.forEach(function(i){if(i.cat)o[i.cat]=1});return Object.keys(o).sort(function(a,b){return a.localeCompare(b,'de')});}
+function catOk(c){var f=state.catFilter||'';return !f||(f==='__none'?!c.it.cat:c.it.cat===f);}
+function refreshCats(){
+  var used=usedCats();
+  if(state.catFilter&&state.catFilter!=='__none'&&used.indexOf(state.catFilter)<0)state.catFilter='';
+  var sel=$('catf');sel.innerHTML='';
+  function opt(v,t){var o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o);}
+  opt('','Alle Kategorien');used.forEach(function(c){opt(c,c)});
+  if(used.length&&state.items.some(function(i){return !i.cat}))opt('__none','Ohne Kategorie');
+  sel.value=state.catFilter||'';state.catFilter=sel.value;
+  sel.hidden=!used.length;
+  var dl=$('catlist');dl.innerHTML='';
+  DEFCATS.concat(used.filter(function(c){return DEFCATS.indexOf(c)<0})).forEach(function(c){var o=document.createElement('option');o.value=c;dl.appendChild(o);});
+}
 function render(){
-  now=new Date();
-  var list=calc(cy,cm),ul=$('list'),tot=0,pd=0,shown=0;
+  now=new Date();refreshCats();
+  var list=calc(cy,cm).filter(catOk),ul=$('list'),tot=0,pd=0,shown=0;
   ul.innerHTML='';$('title').textContent=mname(cy,cm);
   list.forEach(function(c){tot+=c.amt;if(c.paid)pd+=c.amt;});
   list.forEach(function(c){
@@ -195,7 +214,9 @@ function render(){
     var n=document.createElement('div');n.className='n';n.textContent=it.name;
     var a=document.createElement('div');a.className='a';a.textContent=eur(c.amt);
     tp.appendChild(n);tp.appendChild(a);
-    var dd=document.createElement('div');dd.className='d '+cls;dd.textContent=info;
+    var dd=document.createElement('div');dd.className='d '+cls;
+    if(it.cat){var cs=document.createElement('span');cs.className='cat';cs.textContent=it.cat;dd.appendChild(cs);}
+    dd.appendChild(document.createTextNode(info));
     m.appendChild(tp);m.appendChild(dd);
     var e=document.createElement('button');e.className='ib edit';e.innerHTML=PEN;e.setAttribute('aria-label','Bearbeiten');e.onclick=function(){startEdit(it)};
     var x=document.createElement('button');x.className='ib'+(sure===it.id?' sure':'');x.textContent=sure===it.id?'Löschen?':'✕';x.setAttribute('aria-label','Löschen');
@@ -206,7 +227,7 @@ function render(){
     };
     li.appendChild(w);li.appendChild(m);li.appendChild(e);li.appendChild(x);ul.appendChild(li);
   });
-  if(!shown)ul.innerHTML='<div class="empty">'+(!state.items.length?'Noch keine Fixkosten eingetragen.':!list.length?'In diesem Monat ist nichts fällig.':'Alles erledigt, nichts mehr offen.')+'</div>';
+  if(!shown)ul.innerHTML='<div class="empty">'+(!state.items.length?'Noch keine Fixkosten eingetragen.':!list.length?(state.catFilter?'In dieser Kategorie ist in diesem Monat nichts fällig.':'In diesem Monat ist nichts fällig.'):'Alles erledigt, nichts mehr offen.')+'</div>';
   $('tot').textContent=eur(tot);$('open').textContent=eur(tot-pd);$('paid').textContent=eur(pd);
   $('fill').style.width=(tot?pd/tot*100:0)+'%';
   $('done').hidden=!(list.length&&pd===tot);
@@ -219,7 +240,7 @@ function renderYear(){
   var h='<table><thead><tr><th>'+cy+'</th><th>Gesamt</th><th>Offen</th></tr></thead><tbody>',yt=0,yo=0;
   for(var mo=0;mo<12;mo++){
     var t=0,o=0;
-    calc(cy,mo).forEach(function(c){t+=c.amt;if(!c.paid)o+=c.amt;});
+    calc(cy,mo).filter(catOk).forEach(function(c){t+=c.amt;if(!c.paid)o+=c.amt;});
     yt+=t;yo+=o;
     h+='<tr class="m'+(mo===cm?' cur':'')+'" data-m="'+mo+'"><td>'+new Date(cy,mo,1).toLocaleDateString('de-DE',{month:'long'})+'</td><td>'+eur(t)+'</td><td>'+eur(o)+'</td></tr>';
   }
@@ -243,7 +264,7 @@ function startEdit(it){
   editId=it.id;editDay=it.day;editKey=mkey();
   var y=it.sm==null?cy:Math.floor(it.sm/12),mo=it.sm==null?cm:it.sm%12;
   var dim=new Date(y,mo+1,0).getDate();
-  $('nm').value=it.name;$('am').value=it.amount;$('iv').value=String(it.iv||1);
+  $('nm').value=it.name;$('ct').value=it.cat||'';$('am').value=it.amount;$('iv').value=String(it.iv||1);
   $('dt').value=y+'-'+pad(mo+1)+'-'+pad(Math.min(it.day,dim));
   $('en').value=it.end!=null?Math.floor(it.end/12)+'-'+pad(it.end%12+1):'';
   var o=(state.ov[editKey]||{})[it.id];
@@ -256,7 +277,7 @@ function startEdit(it){
 }
 function resetForm(){
   editId=null;editDay=null;editKey=null;
-  $('nm').value='';$('am').value='';$('dt').value='';$('en').value='';$('ao').value='';$('iv').value='1';
+  $('nm').value='';$('ct').value='';$('am').value='';$('dt').value='';$('en').value='';$('ao').value='';$('iv').value='1';
   $('ovw').hidden=true;$('au').checked=true;selCol='';drawSw();
   $('ft').textContent='Neue Fixkosten';$('addBtn').textContent='Hinzufügen';$('cancelBtn').hidden=true;
 }
@@ -268,7 +289,7 @@ $('addBtn').onclick=function(){
   if(/^\d{4}-\d{2}$/.test($('en').value)){var ep=$('en').value.split('-').map(Number);em=ep[0]*12+(ep[1]-1);}
   if(em!==null&&em<sm){alert('Das Enddatum liegt vor der ersten Fälligkeit.');return;}
   if(editId&&editDay){var dn=new Date(pr[0],pr[1],0).getDate();if(editDay>dn&&day===dn)day=editDay;}
-  var obj={name:name,amount:am,day:day,iv:parseInt($('iv').value,10),sm:sm,end:em,auto:$('au').checked,col:selCol};
+  var obj={name:name,cat:$('ct').value.trim(),amount:am,day:day,iv:parseInt($('iv').value,10),sm:sm,end:em,auto:$('au').checked,col:selCol};
   if(editId){
     state.items.forEach(function(i){if(i.id===editId)Object.assign(i,obj);});
     var o=parseFloat(String($('ao').value).replace(',','.'));
@@ -284,9 +305,10 @@ $('prev').onclick=function(){cm--;if(cm<0){cm=11;cy--;}sure=null;render();};
 $('next').onclick=function(){cm++;if(cm>11){cm=0;cy++;}sure=null;render();};
 $('today').onclick=function(){cy=now.getFullYear();cm=now.getMonth();sure=null;render();};
 $('fab').onclick=function(){$('formcard').scrollIntoView({behavior:'smooth',block:'start'});};
+$('catf').onchange=function(){state.catFilter=this.value;save();render();};
 $('onlyopen').onchange=function(){state.openOnly=this.checked;save();render();};
 function doExport(){
-  var name='fixkosten-sicherung-'+now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+'.json';
+  var name='zahltag-sicherung-'+now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+'.json';
   function mark(){state.lastBackup=new Date().toISOString();save();render();}
   var json=JSON.stringify(state,null,1),f=null;
   try{f=new File([json],name,{type:'application/json'});}catch(e){}
