@@ -97,6 +97,7 @@ tfoot td{font-weight:700;border-bottom:0}
 .lrow{display:flex;justify-content:space-between;align-items:center;gap:8px}
 .lrow label{margin:0}
 .add .lnk{grid-column:auto;min-height:36px;padding:4px 8px;background:none;color:var(--accent);font-size:.85rem;font-weight:600;border:0}
+li .desc{font-size:.8rem;font-style:italic;color:var(--muted);overflow-wrap:anywhere;line-height:1.3;margin-bottom:2px}
 .empty{text-align:center;color:var(--muted);padding:24px 8px}
 .fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:2rem;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.3)}
 @media (min-width:900px){
@@ -130,6 +131,7 @@ tfoot td{font-weight:700;border-bottom:0}
   <div class="add" id="formcard">
     <h2 id="ft">Neue Fixkosten</h2>
     <div class="full"><label for="nm">Name</label><input id="nm" placeholder="z. B. Miete" maxlength="60"></div>
+    <div class="full"><label for="ds">Beschreibung (optional)</label><input id="ds" placeholder="z. B. Wohnung Hauptstraße, kündbar bis 30.9." maxlength="80"></div>
     <div class="full"><label for="ct">Kategorie (optional)</label><select id="cs"></select><input id="ct" list="catlist" placeholder="Name der neuen Kategorie" maxlength="30" hidden><datalist id="catlist"></datalist></div>
     <div><label for="am">Betrag in €</label><input id="am" type="number" inputmode="decimal" step="0.01" min="0"></div>
     <div><label for="iv">Rhythmus</label>
@@ -240,7 +242,9 @@ function render(){
     var dd=document.createElement('div');dd.className='d '+cls;
     if(it.cat){var cs=document.createElement('span');cs.className='cat';cs.textContent=it.cat;dd.appendChild(cs);}
     dd.appendChild(document.createTextNode(info));
-    m.appendChild(tp);m.appendChild(dd);
+    m.appendChild(tp);
+    if(it.desc){var dsc=document.createElement('div');dsc.className='desc';dsc.textContent=it.desc;m.appendChild(dsc);}
+    m.appendChild(dd);
     var e=document.createElement('button');e.className='ib edit';e.innerHTML=PEN;e.setAttribute('aria-label','Bearbeiten');e.onclick=function(){startEdit(it)};
     var x=document.createElement('button');x.className='ib'+(sure===it.id?' sure':'');x.textContent=sure===it.id?'Löschen?':'✕';x.setAttribute('aria-label','Löschen');
     x.onclick=function(){
@@ -287,7 +291,7 @@ function startEdit(it){
   editId=it.id;editDay=it.day;editKey=mkey();
   var y=it.sm==null?cy:Math.floor(it.sm/12),mo=it.sm==null?cm:it.sm%12;
   var dim=new Date(y,mo+1,0).getDate();
-  $('nm').value=it.name;$('ct').value='';$('cs').value=it.cat||'';$('ct').hidden=true;$('am').value=it.amount;$('iv').value=String(it.iv||1);
+  $('nm').value=it.name;$('ds').value=it.desc||'';$('ct').value='';$('cs').value=it.cat||'';$('ct').hidden=true;$('am').value=it.amount;$('iv').value=String(it.iv||1);
   $('dt').value=y+'-'+pad(mo+1)+'-'+pad(Math.min(it.day,dim));
   setDm(it.dm||'custom');if(dmode!=='custom')$('mo').value=y+'-'+pad(mo+1);
   $('en').value=it.end!=null?Math.floor(it.end/12)+'-'+pad(it.end%12+1):'';
@@ -301,7 +305,7 @@ function startEdit(it){
 }
 function resetForm(){
   editId=null;editDay=null;editKey=null;
-  $('nm').value='';$('ct').value='';$('cs').value='';$('ct').hidden=true;$('am').value='';$('dt').value='';$('en').value='';$('ao').value='';$('iv').value='1';
+  $('nm').value='';$('ds').value='';$('ct').value='';$('cs').value='';$('ct').hidden=true;$('am').value='';$('dt').value='';$('en').value='';$('ao').value='';$('iv').value='1';
   setDm('custom');$('mo').value='';$('ovw').hidden=true;$('au').checked=true;selCol='';drawSw();
   $('ft').textContent='Neue Fixkosten';$('addBtn').textContent='Hinzufügen';$('cancelBtn').hidden=true;
 }
@@ -323,7 +327,7 @@ $('addBtn').onclick=function(){
   if(/^\d{4}-\d{2}$/.test($('en').value)){var ep=$('en').value.split('-').map(Number);em=ep[0]*12+(ep[1]-1);}
   if(em!==null&&em<sm){alert('Das Enddatum liegt vor der ersten Fälligkeit.');return;}
   if(editId&&editDay){var dn=new Date(pr[0],pr[1],0).getDate();if(editDay>dn&&day===dn)day=editDay;}
-  var obj={name:name,cat:getCat(),amount:am,day:(dmode==='end'?31:day),dm:dmode,iv:parseInt($('iv').value,10),sm:sm,end:em,auto:$('au').checked,col:selCol};
+  var obj={name:name,desc:$('ds').value.trim(),cat:getCat(),amount:am,day:(dmode==='end'?31:day),dm:dmode,iv:parseInt($('iv').value,10),sm:sm,end:em,auto:$('au').checked,col:selCol};
   if(editId){
     state.items.forEach(function(i){if(i.id===editId)Object.assign(i,obj);});
     var o=parseFloat(String($('ao').value).replace(',','.'));
