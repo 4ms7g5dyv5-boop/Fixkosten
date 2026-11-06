@@ -112,6 +112,11 @@ li .desc{font-size:.8rem;font-style:italic;color:var(--muted);overflow-wrap:anyw
 .crow .bs button{min-height:44px;padding:0 14px;border:0;border-radius:10px;font-size:.95rem;font-weight:600}
 .crow .sv{background:var(--accent);color:#fff}
 .crow .dl{background:var(--line);color:var(--bad)}
+.fh{display:flex;justify-content:space-between;align-items:center;cursor:pointer;min-height:44px;user-select:none;-webkit-user-select:none}
+.chev{color:var(--muted);font-size:1.3rem;transition:transform .2s}
+.add.closed .chev{transform:rotate(-90deg)}
+.add.closed{padding-top:4px;padding-bottom:4px}
+.add.closed>*:not(.fh){display:none}
 .empty{text-align:center;color:var(--muted);padding:24px 8px}
 .fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:2rem;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.3)}
 @media (min-width:900px){
@@ -143,7 +148,7 @@ li .desc{font-size:.8rem;font-style:italic;color:var(--muted);overflow-wrap:anyw
   <ul id="list"></ul>
 </section><aside class="col-b">
   <div class="add" id="formcard">
-    <h2 id="ft">Neue Fixkosten</h2>
+    <h2 class="fh" id="ftw" role="button" tabindex="0" aria-expanded="true"><span id="ft">Neue Fixkosten</span><span class="chev" aria-hidden="true">▾</span></h2>
     <div class="full"><label for="nm">Name</label><input id="nm" placeholder="z. B. Miete" maxlength="60"></div>
     <div class="full"><label for="ds">Beschreibung (optional)</label><input id="ds" placeholder="z. B. Wohnung Hauptstraße, kündbar bis 30.9." maxlength="80"></div>
     <div class="full"><div class="lrow"><label for="cs">Kategorie (optional)</label><button type="button" class="lnk" id="cmo" hidden>Verwalten</button></div><select id="cs"></select><input id="ct" list="catlist" placeholder="Name der neuen Kategorie" maxlength="30" hidden><datalist id="catlist"></datalist></div>
@@ -234,6 +239,7 @@ function refreshCats(){
   var dl=$('catlist');dl.innerHTML='';
   DEFCATS.filter(function(c){return used.indexOf(c)<0}).forEach(function(c){var o=document.createElement('option');o.value=c;dl.appendChild(o);});
 }
+function fmtDT(iso){var d=new Date(iso);return d.toLocaleDateString('de-DE')+', '+d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+' Uhr';}
 function getCat(){return $('cs').value==='__new'?$('ct').value.trim():$('cs').value;}
 function render(){
   now=new Date();refreshCats();
@@ -280,8 +286,9 @@ function render(){
   $('fill').style.width=(tot?pd/tot*100:0)+'%';
   $('done').hidden=!(list.length&&pd===tot);
   $('onlyopen').checked=!!state.openOnly;
+  applyForm();
   $('today').hidden=(cy===now.getFullYear()&&cm===now.getMonth());
-  $('lb').textContent=state.lastBackup?'Letzte Sicherung: '+new Date(state.lastBackup).toLocaleDateString('de-DE'):'Noch keine Sicherung erstellt.';
+  $('lb').textContent=state.lastBackup?'Letzte Sicherung: '+fmtDT(state.lastBackup):'Noch keine Sicherung erstellt.';
   renderYear();
 }
 function renderYear(){
@@ -310,6 +317,7 @@ function drawSw(){
 }
 function startEdit(it){
   editId=it.id;editDay=it.day;editKey=mkey();
+  restoreClosed=(state.formOpen===false);state.formOpen=true;applyForm();
   var y=it.sm==null?cy:Math.floor(it.sm/12),mo=it.sm==null?cm:it.sm%12;
   var dim=new Date(y,mo+1,0).getDate();
   $('nm').value=it.name;$('ds').value=it.desc||'';$('ct').value='';$('cs').value=it.cat||'';$('ct').hidden=true;$('am').value=it.amount;$('iv').value=String(it.iv||1);
@@ -326,6 +334,7 @@ function startEdit(it){
 }
 function resetForm(){
   editId=null;editDay=null;editKey=null;
+  if(restoreClosed){restoreClosed=false;state.formOpen=false;save();applyForm();}
   $('nm').value='';$('ds').value='';$('ct').value='';$('cs').value='';$('ct').hidden=true;$('am').value='';$('dt').value='';$('en').value='';$('ao').value='';$('iv').value='1';
   setDm('custom');$('mo').value='';$('ovw').hidden=true;$('au').checked=true;selCol='';drawSw();
   $('ft').textContent='Neue Fixkosten';$('addBtn').textContent='Hinzufügen';$('cancelBtn').hidden=true;
@@ -368,6 +377,11 @@ function closeCm(){$('cm').hidden=true;document.body.style.overflow='';}
 $('cmo').onclick=openCm;$('cmx').onclick=closeCm;
 $('cm').onclick=function(e){if(e.target===this)closeCm();};
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeCm();});
+var restoreClosed=false;
+function applyForm(){var open=state.formOpen!==false;$('formcard').classList.toggle('closed',!open);$('ftw').setAttribute('aria-expanded',open?'true':'false');}
+function setForm(o){state.formOpen=o;save();applyForm();}
+$('ftw').onclick=function(){setForm($('formcard').classList.contains('closed'));};
+$('ftw').onkeydown=function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();this.click();}};
 var dmode='custom';
 function setDm(m){
   dmode=m;
@@ -401,7 +415,7 @@ $('addBtn').onclick=function(){
 $('prev').onclick=function(){cm--;if(cm<0){cm=11;cy--;}sure=null;render();};
 $('next').onclick=function(){cm++;if(cm>11){cm=0;cy++;}sure=null;render();};
 $('today').onclick=function(){cy=now.getFullYear();cm=now.getMonth();sure=null;render();};
-$('fab').onclick=function(){$('formcard').scrollIntoView({behavior:'smooth',block:'start'});};
+$('fab').onclick=function(){setForm(true);$('formcard').scrollIntoView({behavior:'smooth',block:'start'});};
 $('cs').onchange=function(){$('ct').hidden=this.value!=='__new';if(!$('ct').hidden)$('ct').focus();};
 $('catf').onchange=function(){state.catFilter=this.value;save();render();};
 $('onlyopen').onchange=function(){state.openOnly=this.checked;save();render();};
