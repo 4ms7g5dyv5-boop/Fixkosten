@@ -84,6 +84,8 @@ tfoot td{font-weight:700;border-bottom:0}
 .filters{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:6px}
 .filters select{min-height:44px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:16px;max-width:100%}
 .cat{display:inline-block;background:var(--field);color:var(--text);border-radius:99px;padding:1px 9px;font-size:.74rem;margin-right:6px;font-weight:600}
+#ct{margin-top:8px}
+.add input[hidden]{display:none}
 .empty{text-align:center;color:var(--muted);padding:24px 8px}
 .fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:2rem;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.3)}
 @media (min-width:900px){
@@ -117,7 +119,7 @@ tfoot td{font-weight:700;border-bottom:0}
   <div class="add" id="formcard">
     <h2 id="ft">Neue Fixkosten</h2>
     <div class="full"><label for="nm">Name</label><input id="nm" placeholder="z. B. Miete" maxlength="60"></div>
-    <div class="full"><label for="ct">Kategorie (optional)</label><input id="ct" list="catlist" placeholder="z. B. Wohnen" maxlength="30"><datalist id="catlist"></datalist></div>
+    <div class="full"><label for="ct">Kategorie (optional)</label><select id="cs"></select><input id="ct" list="catlist" placeholder="Name der neuen Kategorie" maxlength="30" hidden><datalist id="catlist"></datalist></div>
     <div><label for="am">Betrag in €</label><input id="am" type="number" inputmode="decimal" step="0.01" min="0"></div>
     <div><label for="iv">Rhythmus</label>
       <select id="iv"><option value="1">monatlich</option><option value="3">vierteljährlich</option><option value="6">halbjährlich</option><option value="12">jährlich</option></select>
@@ -186,9 +188,15 @@ function refreshCats(){
   if(used.length&&state.items.some(function(i){return !i.cat}))opt('__none','Ohne Kategorie');
   sel.value=state.catFilter||'';state.catFilter=sel.value;
   sel.hidden=!used.length;
+  var cs=$('cs'),cur=cs.value;cs.innerHTML='';
+  function copt(v,t){var o=document.createElement('option');o.value=v;o.textContent=t;cs.appendChild(o);}
+  copt('','Keine Kategorie');used.forEach(function(c){copt(c,c)});copt('__new','+ Neue Kategorie …');
+  cs.value=cur;if(cs.value!==cur)cs.value='';
+  $('ct').hidden=cs.value!=='__new';
   var dl=$('catlist');dl.innerHTML='';
-  DEFCATS.concat(used.filter(function(c){return DEFCATS.indexOf(c)<0})).forEach(function(c){var o=document.createElement('option');o.value=c;dl.appendChild(o);});
+  DEFCATS.filter(function(c){return used.indexOf(c)<0}).forEach(function(c){var o=document.createElement('option');o.value=c;dl.appendChild(o);});
 }
+function getCat(){return $('cs').value==='__new'?$('ct').value.trim():$('cs').value;}
 function render(){
   now=new Date();refreshCats();
   var list=calc(cy,cm).filter(catOk),ul=$('list'),tot=0,pd=0,shown=0;
@@ -264,7 +272,7 @@ function startEdit(it){
   editId=it.id;editDay=it.day;editKey=mkey();
   var y=it.sm==null?cy:Math.floor(it.sm/12),mo=it.sm==null?cm:it.sm%12;
   var dim=new Date(y,mo+1,0).getDate();
-  $('nm').value=it.name;$('ct').value=it.cat||'';$('am').value=it.amount;$('iv').value=String(it.iv||1);
+  $('nm').value=it.name;$('ct').value='';$('cs').value=it.cat||'';$('ct').hidden=true;$('am').value=it.amount;$('iv').value=String(it.iv||1);
   $('dt').value=y+'-'+pad(mo+1)+'-'+pad(Math.min(it.day,dim));
   $('en').value=it.end!=null?Math.floor(it.end/12)+'-'+pad(it.end%12+1):'';
   var o=(state.ov[editKey]||{})[it.id];
@@ -277,7 +285,7 @@ function startEdit(it){
 }
 function resetForm(){
   editId=null;editDay=null;editKey=null;
-  $('nm').value='';$('ct').value='';$('am').value='';$('dt').value='';$('en').value='';$('ao').value='';$('iv').value='1';
+  $('nm').value='';$('ct').value='';$('cs').value='';$('ct').hidden=true;$('am').value='';$('dt').value='';$('en').value='';$('ao').value='';$('iv').value='1';
   $('ovw').hidden=true;$('au').checked=true;selCol='';drawSw();
   $('ft').textContent='Neue Fixkosten';$('addBtn').textContent='Hinzufügen';$('cancelBtn').hidden=true;
 }
@@ -289,7 +297,7 @@ $('addBtn').onclick=function(){
   if(/^\d{4}-\d{2}$/.test($('en').value)){var ep=$('en').value.split('-').map(Number);em=ep[0]*12+(ep[1]-1);}
   if(em!==null&&em<sm){alert('Das Enddatum liegt vor der ersten Fälligkeit.');return;}
   if(editId&&editDay){var dn=new Date(pr[0],pr[1],0).getDate();if(editDay>dn&&day===dn)day=editDay;}
-  var obj={name:name,cat:$('ct').value.trim(),amount:am,day:day,iv:parseInt($('iv').value,10),sm:sm,end:em,auto:$('au').checked,col:selCol};
+  var obj={name:name,cat:getCat(),amount:am,day:day,iv:parseInt($('iv').value,10),sm:sm,end:em,auto:$('au').checked,col:selCol};
   if(editId){
     state.items.forEach(function(i){if(i.id===editId)Object.assign(i,obj);});
     var o=parseFloat(String($('ao').value).replace(',','.'));
@@ -305,6 +313,7 @@ $('prev').onclick=function(){cm--;if(cm<0){cm=11;cy--;}sure=null;render();};
 $('next').onclick=function(){cm++;if(cm>11){cm=0;cy++;}sure=null;render();};
 $('today').onclick=function(){cy=now.getFullYear();cm=now.getMonth();sure=null;render();};
 $('fab').onclick=function(){$('formcard').scrollIntoView({behavior:'smooth',block:'start'});};
+$('cs').onchange=function(){$('ct').hidden=this.value!=='__new';if(!$('ct').hidden)$('ct').focus();};
 $('catf').onchange=function(){state.catFilter=this.value;save();render();};
 $('onlyopen').onchange=function(){state.openOnly=this.checked;save();render();};
 function doExport(){
