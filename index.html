@@ -98,6 +98,20 @@ tfoot td{font-weight:700;border-bottom:0}
 .lrow label{margin:0}
 .add .lnk{grid-column:auto;min-height:36px;padding:4px 8px;background:none;color:var(--accent);font-size:.85rem;font-weight:600;border:0}
 li .desc{font-size:.8rem;font-style:italic;color:var(--muted);overflow-wrap:anywhere;line-height:1.3;margin-bottom:2px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:50}
+.modal[hidden]{display:none}
+.sheet{background:var(--card);color:var(--text);width:100%;max-width:480px;max-height:85vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+@media (min-width:600px){.modal{align-items:center}.sheet{border-radius:18px}}
+.shead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.shead h2{font-size:1.1rem;margin:0}
+.sheet small{display:block;color:var(--muted);font-size:.8rem}
+.crow{margin-bottom:14px}
+.crow input{width:100%;min-height:48px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--field);color:var(--text);font-size:16px}
+.crow .r2{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px}
+.crow .bs{display:flex;gap:8px}
+.crow .bs button{min-height:44px;padding:0 14px;border:0;border-radius:10px;font-size:.95rem;font-weight:600}
+.crow .sv{background:var(--accent);color:#fff}
+.crow .dl{background:var(--line);color:var(--bad)}
 .empty{text-align:center;color:var(--muted);padding:24px 8px}
 .fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:2rem;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.3)}
 @media (min-width:900px){
@@ -132,7 +146,7 @@ li .desc{font-size:.8rem;font-style:italic;color:var(--muted);overflow-wrap:anyw
     <h2 id="ft">Neue Fixkosten</h2>
     <div class="full"><label for="nm">Name</label><input id="nm" placeholder="z. B. Miete" maxlength="60"></div>
     <div class="full"><label for="ds">Beschreibung (optional)</label><input id="ds" placeholder="z. B. Wohnung Hauptstraße, kündbar bis 30.9." maxlength="80"></div>
-    <div class="full"><label for="ct">Kategorie (optional)</label><select id="cs"></select><input id="ct" list="catlist" placeholder="Name der neuen Kategorie" maxlength="30" hidden><datalist id="catlist"></datalist></div>
+    <div class="full"><div class="lrow"><label for="cs">Kategorie (optional)</label><button type="button" class="lnk" id="cmo" hidden>Verwalten</button></div><select id="cs"></select><input id="ct" list="catlist" placeholder="Name der neuen Kategorie" maxlength="30" hidden><datalist id="catlist"></datalist></div>
     <div><label for="am">Betrag in €</label><input id="am" type="number" inputmode="decimal" step="0.01" min="0"></div>
     <div><label for="iv">Rhythmus</label>
       <select id="iv"><option value="1">monatlich</option><option value="3">vierteljährlich</option><option value="6">halbjährlich</option><option value="12">jährlich</option></select>
@@ -162,6 +176,13 @@ li .desc{font-size:.8rem;font-style:italic;color:var(--muted);overflow-wrap:anyw
 </aside></div>
 </main>
 <button id="fab" class="fab" aria-label="Neuer Eintrag">+</button>
+<div id="cm" class="modal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="cmt">
+    <div class="shead"><h2 id="cmt">Kategorien verwalten</h2><button type="button" id="cmx" class="ib" aria-label="Schließen">✕</button></div>
+    <div id="cml"></div>
+    <small>Umbenennen ändert alle Einträge mit dieser Kategorie. Gibt es den neuen Namen schon, werden sie zusammengelegt. Löschen entfernt nur die Kategorie, nicht die Einträge.</small>
+  </div>
+</div>
 <script>
 var KEY='fixkosten-v1';
 var state={items:[],paid:{},ov:{},openOnly:false};
@@ -204,7 +225,7 @@ function refreshCats(){
   opt('','Alle Kategorien');used.forEach(function(c){opt(c,c)});
   if(used.length&&state.items.some(function(i){return !i.cat}))opt('__none','Ohne Kategorie');
   sel.value=state.catFilter||'';state.catFilter=sel.value;
-  sel.hidden=!used.length;
+  sel.hidden=!used.length;$('cmo').hidden=!used.length;
   var cs=$('cs'),cur=cs.value;cs.innerHTML='';
   function copt(v,t){var o=document.createElement('option');o.value=v;o.textContent=t;cs.appendChild(o);}
   copt('','Keine Kategorie');used.forEach(function(c){copt(c,c)});copt('__new','+ Neue Kategorie …');
@@ -309,6 +330,44 @@ function resetForm(){
   setDm('custom');$('mo').value='';$('ovw').hidden=true;$('au').checked=true;selCol='';drawSw();
   $('ft').textContent='Neue Fixkosten';$('addBtn').textContent='Hinzufügen';$('cancelBtn').hidden=true;
 }
+function drawCm(){
+  var box=$('cml');box.innerHTML='';var used=usedCats();
+  if(!used.length){box.innerHTML='<div class="empty">Noch keine Kategorien vorhanden.</div>';return;}
+  used.forEach(function(c){
+    var cnt=state.items.filter(function(i){return i.cat===c}).length;
+    var row=document.createElement('div');row.className='crow';
+    var inp=document.createElement('input');inp.value=c;inp.maxLength=30;inp.setAttribute('aria-label','Kategorie '+c);
+    var r2=document.createElement('div');r2.className='r2';
+    var info=document.createElement('small');info.textContent=cnt+(cnt===1?' Eintrag':' Einträge');
+    var bs=document.createElement('div');bs.className='bs';
+    var sv=document.createElement('button');sv.type='button';sv.className='sv';sv.textContent='Speichern';
+    var dl=document.createElement('button');dl.type='button';dl.className='dl';dl.textContent='Löschen';
+    sv.onclick=function(){
+      var nv=inp.value.trim();
+      if(!nv){alert('Bitte einen Namen eingeben.');return;}
+      if(nv===c)return;
+      var wasSel=$('cs').value===c;
+      state.items.forEach(function(i){if(i.cat===c)i.cat=nv;});
+      if(state.catFilter===c)state.catFilter=nv;
+      save();render();if(wasSel)$('cs').value=nv;drawCm();
+    };
+    dl.onclick=function(){
+      if(dl.getAttribute('data-s')!=='1'){dl.setAttribute('data-s','1');dl.textContent='Sicher?';return;}
+      var wasSel=$('cs').value===c;
+      state.items.forEach(function(i){if(i.cat===c)i.cat='';});
+      if(state.catFilter===c)state.catFilter='';
+      if(wasSel)$('cs').value='';
+      save();render();drawCm();
+    };
+    bs.appendChild(sv);bs.appendChild(dl);r2.appendChild(info);r2.appendChild(bs);
+    row.appendChild(inp);row.appendChild(r2);box.appendChild(row);
+  });
+}
+function openCm(){drawCm();$('cm').hidden=false;document.body.style.overflow='hidden';}
+function closeCm(){$('cm').hidden=true;document.body.style.overflow='';}
+$('cmo').onclick=openCm;$('cmx').onclick=closeCm;
+$('cm').onclick=function(e){if(e.target===this)closeCm();};
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeCm();});
 var dmode='custom';
 function setDm(m){
   dmode=m;
