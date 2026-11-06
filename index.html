@@ -75,7 +75,8 @@ li.paid .n,li.paid .a{text-decoration:line-through;color:var(--muted)}
 .add .sw button.on{border-color:var(--text);box-shadow:inset 0 0 0 3px var(--card)}
 .card button.sec{min-height:48px;padding:11px 16px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--text);font-size:1rem;margin:0 8px 8px 0}
 .card button.sec:hover{background:var(--line)}
-details summary{font-weight:600;cursor:pointer;min-height:44px;display:flex;align-items:center}
+details summary{font-weight:600;cursor:pointer;min-height:44px;display:flex;align-items:center;justify-content:space-between;list-style:none}
+details summary::-webkit-details-marker{display:none}
 table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font-size:.95rem}
 td,th{padding:10px 4px;text-align:right;border-bottom:1px solid var(--line)}
 td:first-child,th:first-child{text-align:left}
@@ -113,7 +114,8 @@ li .desc{font-size:.8rem;font-style:italic;color:var(--muted);overflow-wrap:anyw
 .crow .sv{background:var(--accent);color:#fff}
 .crow .dl{background:var(--line);color:var(--bad)}
 .fh{display:flex;justify-content:space-between;align-items:center;cursor:pointer;min-height:44px;user-select:none;-webkit-user-select:none}
-.chev{color:var(--muted);font-size:1.3rem;transition:transform .2s}
+.chev{flex:none;color:var(--muted);transition:transform .2s}
+details:not([open]) .chev{transform:rotate(-90deg)}
 .add.closed .chev{transform:rotate(-90deg)}
 .add.closed{padding-top:4px;padding-bottom:4px}
 .add.closed>*:not(.fh){display:none}
@@ -148,7 +150,7 @@ li .desc{font-size:.8rem;font-style:italic;color:var(--muted);overflow-wrap:anyw
   <ul id="list"></ul>
 </section><aside class="col-b">
   <div class="add" id="formcard">
-    <h2 class="fh" id="ftw" role="button" tabindex="0" aria-expanded="true"><span id="ft">Neue Fixkosten</span><span class="chev" aria-hidden="true">▾</span></h2>
+    <h2 class="fh" id="ftw" role="button" tabindex="0" aria-expanded="true"><span id="ft">Neue Fixkosten</span><svg class="chev" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></h2>
     <div class="full"><label for="nm">Name</label><input id="nm" placeholder="z. B. Miete" maxlength="60"></div>
     <div class="full"><label for="ds">Beschreibung (optional)</label><input id="ds" placeholder="z. B. Wohnung Hauptstraße, kündbar bis 30.9." maxlength="80"></div>
     <div class="full"><div class="lrow"><label for="cs">Kategorie (optional)</label><button type="button" class="lnk" id="cmo" hidden>Verwalten</button></div><select id="cs"></select><input id="ct" list="catlist" placeholder="Name der neuen Kategorie" maxlength="30" hidden><datalist id="catlist"></datalist></div>
@@ -170,7 +172,7 @@ li .desc{font-size:.8rem;font-style:italic;color:var(--muted);overflow-wrap:anyw
     <button id="cancelBtn" class="cancel" hidden>Abbrechen</button>
   </div>
   <div class="card">
-    <details><summary>Jahresübersicht</summary><div id="yrbody"></div></details>
+    <details><summary><span>Jahresübersicht</span><svg class="chev" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary><div id="yrbody"></div></details>
   </div>
   <div class="card">
     <h2>Sicherung</h2>
