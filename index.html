@@ -126,6 +126,18 @@ details:not([open]) .chev{transform:rotate(-90deg)}
 .coin.l{transform:rotate(-14deg)}.coin.r{transform:rotate(14deg)}
 .filters .flt{flex:1 1 100%;margin:0}
 .filters select{flex:1 1 0;min-width:0}
+.mh{margin:0}
+.mh button{background:none;border:0;color:inherit;font:inherit;display:inline-flex;align-items:center;gap:2px;padding:6px 6px 6px 10px;border-radius:10px;cursor:pointer}
+.mh button:hover{background:var(--line)}
+.tdate{font-weight:300;font-size:.82rem;color:var(--muted);letter-spacing:.02em;margin-top:-2px}
+.yrnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.yrnav b{font-size:1.15rem}
+.ynb{width:46px;height:46px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);font-size:1.5rem;line-height:1}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mgrid button{min-height:54px;border-radius:12px;border:2px solid transparent;background:var(--item);color:var(--text);font-size:1rem;font-weight:600;font-family:inherit}
+.mgrid button.cur{border-color:var(--accent);color:var(--accent)}
+.mgrid button.now{box-shadow:inset 0 -4px 0 var(--ok)}
+.mnow{margin-top:14px;width:100%;min-height:50px;border:0;border-radius:12px;background:var(--accent);color:#fff;font-size:1rem;font-weight:600}
 .empty{text-align:center;color:var(--muted);padding:24px 8px}
 .fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:2rem;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.3)}
 @media (min-width:900px){
@@ -142,7 +154,7 @@ details:not([open]) .chev{transform:rotate(-90deg)}
 <div class="layout"><section class="col-a">
   <div class="nav">
     <button id="prev" aria-label="Voriger Monat">‹</button>
-    <div class="mid"><h2 id="title"></h2><button id="today" class="chip" hidden>Zum aktuellen Monat</button></div>
+    <div class="mid"><h2 class="mh"><button type="button" id="mbtn" aria-haspopup="dialog" aria-label="Monat wählen"><span id="title"></span><svg class="chev" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></h2><div class="tdate" id="tdate"></div><button id="today" class="chip" hidden>Zum aktuellen Monat</button></div>
     <button id="next" aria-label="Nächster Monat">›</button>
   </div>
   <div class="sum">
@@ -191,6 +203,14 @@ details:not([open]) .chev{transform:rotate(-90deg)}
 </aside></div>
 </main>
 <button id="fab" class="fab" aria-label="Neuer Eintrag">+</button>
+<div id="mm" class="modal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mmt">
+    <div class="shead"><h2 id="mmt">Monat wählen</h2><button type="button" id="mmx" class="ib" aria-label="Schließen">✕</button></div>
+    <div class="yrnav"><button type="button" id="py" class="ynb" aria-label="Vorheriges Jahr">‹</button><b id="pyl"></b><button type="button" id="ny" class="ynb" aria-label="Nächstes Jahr">›</button></div>
+    <div class="mgrid" id="mgrid"></div>
+    <button type="button" id="mnow" class="mnow">Zum aktuellen Monat</button>
+  </div>
+</div>
 <div id="cm" class="modal" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="cmt">
     <div class="shead"><h2 id="cmt">Kategorien verwalten</h2><button type="button" id="cmx" class="ib" aria-label="Schließen">✕</button></div>
@@ -266,6 +286,7 @@ function render(){
   now=new Date();refreshCats();
   var list=sortList(calc(cy,cm).filter(catOk)),ul=$('list'),tot=0,pd=0,shown=0;
   ul.innerHTML='';$('title').textContent=mname(cy,cm);
+  $('tdate').textContent=now.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   list.forEach(function(c){tot+=c.amt;if(c.paid)pd+=c.amt;});
   list.forEach(function(c){
     if(state.openOnly&&c.paid)return;
@@ -398,7 +419,28 @@ function openCm(){drawCm();$('cm').hidden=false;document.body.style.overflow='hi
 function closeCm(){$('cm').hidden=true;document.body.style.overflow='';}
 $('cmo').onclick=openCm;$('cmx').onclick=closeCm;
 $('cm').onclick=function(e){if(e.target===this)closeCm();};
-document.addEventListener('keydown',function(e){if(e.key==='Escape')closeCm();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeCm();closeMm();}});
+var pyear=cy;
+function drawMm(){
+  $('pyl').textContent=pyear;
+  var g=$('mgrid');g.innerHTML='';
+  for(var m=0;m<12;m++){(function(m){
+    var b=document.createElement('button');b.type='button';
+    b.textContent=new Date(2000,m,1).toLocaleDateString('de-DE',{month:'short'});
+    var c=[];if(pyear===cy&&m===cm)c.push('cur');if(pyear===now.getFullYear()&&m===now.getMonth())c.push('now');
+    b.className=c.join(' ');b.setAttribute('aria-label',mname(pyear,m));
+    b.onclick=function(){cy=pyear;cm=m;sure=null;closeMm();render();window.scrollTo(0,0);};
+    g.appendChild(b);
+  })(m);}
+}
+function openMm(){pyear=cy;drawMm();$('mm').hidden=false;document.body.style.overflow='hidden';}
+function closeMm(){$('mm').hidden=true;document.body.style.overflow='';}
+$('mbtn').onclick=openMm;$('mmx').onclick=closeMm;
+$('mm').onclick=function(e){if(e.target===this)closeMm();};
+$('py').onclick=function(){pyear--;drawMm();};
+$('ny').onclick=function(){pyear++;drawMm();};
+$('mnow').onclick=function(){cy=now.getFullYear();cm=now.getMonth();sure=null;closeMm();render();};
+document.addEventListener('visibilitychange',function(){if(!document.hidden)render();});
 var restoreClosed=false;
 function applyForm(){var open=state.formOpen!==false;$('formcard').classList.toggle('closed',!open);$('ftw').setAttribute('aria-expanded',open?'true':'false');}
 function setForm(o){state.formOpen=o;save();applyForm();}
