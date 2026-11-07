@@ -158,6 +158,19 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .stick.compact .sum b{font-size:1rem}
 .opts{flex:1 1 100%;display:flex;flex-wrap:wrap;gap:0 18px}
 .opts .flt{flex:0 0 auto}
+.optbtn{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font-size:1rem;font-weight:600;font-family:inherit}
+.optbtn:hover{background:var(--line)}
+.optbtn .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--accent)}
+.optbtn .dot[hidden]{display:none}
+.filters #sortf{flex:1 1 0;min-width:140px}
+.filters #catf{flex:1 1 100%}
+.swrow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);cursor:pointer;font-weight:600}
+.swrow:last-of-type{border-bottom:0}
+.swrow small{font-weight:400}
+.tgl{-webkit-appearance:none;appearance:none;flex:none;width:52px;height:32px;border-radius:99px;background:var(--line);position:relative;transition:background .2s;margin:0;cursor:pointer}
+.tgl::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+.tgl:checked{background:var(--ok)}
+.tgl:checked::after{transform:translateX(20px)}
 .empty{text-align:center;color:var(--muted);padding:24px 8px}
 .fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:2rem;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.3)}
 @media (min-width:900px){
@@ -188,7 +201,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <div class="done" id="done" hidden>✓ Alles bezahlt</div>
   </div>
   </div>
-  <div class="filters"><div class="opts"><label class="flt"><input id="onlyopen" type="checkbox"> Nur offene anzeigen</label><label class="flt"><input id="pinhead" type="checkbox"> Kopf fixieren</label></div><select id="sortf" aria-label="Sortierung"></select><select id="catf" aria-label="Kategorie filtern"></select></div>
+  <div class="filters"><button type="button" id="optbtn" class="optbtn" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg><span>Option</span><i id="optdot" class="dot" hidden></i></button><select id="sortf" aria-label="Sortierung"></select><select id="catf" aria-label="Kategorie filtern"></select></div>
   <ul id="list"></ul>
 </section><aside class="col-b">
   <div class="add" id="formcard">
@@ -225,6 +238,13 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 </aside></div>
 </main>
 <button id="fab" class="fab" aria-label="Neuer Eintrag">+</button>
+<div id="om" class="modal" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="omt">
+    <div class="shead"><h2 id="omt">Option</h2><button type="button" id="omx" class="ib" aria-label="Schließen">✕</button></div>
+    <label class="swrow"><span>Nur offene anzeigen<small>Bezahlte Einträge ausblenden</small></span><input id="onlyopen" type="checkbox" class="tgl"></label>
+    <label class="swrow"><span>Kopf fixieren<small>Monat und Summen bleiben beim Scrollen oben</small></span><input id="pinhead" type="checkbox" class="tgl"></label>
+  </div>
+</div>
 <div id="mm" class="modal" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mmt">
     <div class="shead"><h2 id="mmt">Monat wählen</h2><button type="button" id="mmx" class="ib" aria-label="Schließen">✕</button></div>
@@ -350,6 +370,7 @@ function render(){
   $('fill').style.width=(tot?pd/tot*100:0)+'%';
   $('done').hidden=!(list.length&&pd===tot);
   $('onlyopen').checked=!!state.openOnly;
+  $('optdot').hidden=!state.openOnly;
   $('sortf').value=state.sortBy||'due';
   applyForm();applyPin();
   $('today').hidden=(cy===now.getFullYear()&&cm===now.getMonth());
@@ -441,7 +462,7 @@ function openCm(){drawCm();$('cm').hidden=false;document.body.style.overflow='hi
 function closeCm(){$('cm').hidden=true;document.body.style.overflow='';}
 $('cmo').onclick=openCm;$('cmx').onclick=closeCm;
 $('cm').onclick=function(e){if(e.target===this)closeCm();};
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeCm();closeMm();}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeCm();closeMm();closeOm();}});
 var pyear=cy;
 function drawMm(){
   $('pyl').textContent=pyear;
@@ -463,6 +484,10 @@ $('py').onclick=function(){pyear--;drawMm();};
 $('ny').onclick=function(){pyear++;drawMm();};
 $('mnow').onclick=function(){cy=now.getFullYear();cm=now.getMonth();sure=null;closeMm();render();};
 document.addEventListener('visibilitychange',function(){if(!document.hidden)render();});
+function openOm(){$('om').hidden=false;document.body.style.overflow='hidden';}
+function closeOm(){$('om').hidden=true;document.body.style.overflow='';}
+$('optbtn').onclick=openOm;$('omx').onclick=closeOm;
+$('om').onclick=function(e){if(e.target===this)closeOm();};
 function applyPin(){var on=state.pinHead!==false,st=$('stick');st.classList.toggle('pin',on);if(!on)st.classList.remove('compact');$('pinhead').checked=on;}
 function onScroll(){
   var st=$('stick');if(!st.classList.contains('pin'))return;
