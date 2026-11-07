@@ -141,10 +141,21 @@ details:not([open]) .chev{transform:rotate(-90deg)}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:19;background:var(--bg)}
 .stick.pin{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);padding-top:2px}
 .stick.pin.compact{box-shadow:0 8px 8px -8px rgba(0,0,0,.35)}
-.stick.compact .tdate,.stick.compact .chip,.stick.compact .bar,.stick.compact .done{display:none}
+/* weiches Ein- und Ausklappen im fixierten Kopfbereich */
+.stick .nav,.stick .sum,.stick .tdate,.stick .bar,.stick .done,.stick .chip,.stick .mh,.stick .sum b,.stick .nav>button{transition:all .28s ease}
+.chip{display:block;margin:0 auto;max-height:40px;overflow:hidden}
+.chip[hidden]{display:none}
+.done{max-height:30px;overflow:hidden}
+.done[hidden]{display:none}
+.stick.compact .chip{max-height:0;opacity:0;padding-top:0;padding-bottom:0}
+.stick.compact .bar{height:0;margin-top:0;opacity:0}
+.stick.compact .done{max-height:0;margin-top:0;opacity:0}
+.stick.compact .tdate{margin-top:-6px;font-size:.74rem}
+.stick.compact .mh{font-size:1.12rem}
 .stick.compact .nav{margin-bottom:6px}
 .stick.compact .nav>button{width:40px;height:40px}
 .stick.compact .sum{padding:8px 14px;margin-bottom:6px}
+.stick.compact .sum b{font-size:1rem}
 .opts{flex:1 1 100%;display:flex;flex-wrap:wrap;gap:0 18px}
 .opts .flt{flex:0 0 auto}
 .empty{text-align:center;color:var(--muted);padding:24px 8px}
