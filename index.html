@@ -162,8 +162,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .optbtn:hover{background:var(--line)}
 .optbtn .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--accent)}
 .optbtn .dot[hidden]{display:none}
-.filters #sortf{flex:1 1 0;min-width:140px}
-.filters #catf{flex:1 1 100%}
+.filters #catf{flex:1 1 0;min-width:140px}
 .swrow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--line);cursor:pointer;font-weight:600}
 .swrow:last-of-type{border-bottom:0}
 .swrow small{font-weight:400}
@@ -171,6 +170,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .tgl::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
 .tgl:checked{background:var(--ok)}
 .tgl:checked::after{transform:translateX(20px)}
+.swrow.sel{border-bottom:1px solid var(--line);cursor:default}
+.sheet select{-webkit-appearance:none;appearance:none;flex:0 1 52%;min-width:0;min-height:46px;padding:10px 40px 10px 12px;border:1px solid var(--line);border-radius:10px;background-color:var(--field);color:var(--text);font-size:16px;font-family:inherit;font-weight:400;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%238a94a1' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;background-size:20px 20px;text-overflow:ellipsis}
 .empty{text-align:center;color:var(--muted);padding:24px 8px}
 .fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:2rem;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.3)}
 @media (min-width:900px){
@@ -201,7 +202,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     <div class="done" id="done" hidden>✓ Alles bezahlt</div>
   </div>
   </div>
-  <div class="filters"><button type="button" id="optbtn" class="optbtn" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg><span>Option</span><i id="optdot" class="dot" hidden></i></button><select id="sortf" aria-label="Sortierung"></select><select id="catf" aria-label="Kategorie filtern"></select></div>
+  <div class="filters"><button type="button" id="optbtn" class="optbtn" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg><span>Option</span><i id="optdot" class="dot" hidden></i></button><select id="catf" aria-label="Kategorie filtern"></select></div>
   <ul id="list"></ul>
 </section><aside class="col-b">
   <div class="add" id="formcard">
@@ -241,6 +242,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 <div id="om" class="modal" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="omt">
     <div class="shead"><h2 id="omt">Option</h2><button type="button" id="omx" class="ib" aria-label="Schließen">✕</button></div>
+    <div class="swrow sel"><span>Sortierung<small>Reihenfolge der Einträge</small></span><select id="sortf" aria-label="Sortierung"></select></div>
     <label class="swrow"><span>Nur offene anzeigen<small>Bezahlte Einträge ausblenden</small></span><input id="onlyopen" type="checkbox" class="tgl"></label>
     <label class="swrow"><span>Kopf fixieren<small>Monat und Summen bleiben beim Scrollen oben</small></span><input id="pinhead" type="checkbox" class="tgl"></label>
   </div>
